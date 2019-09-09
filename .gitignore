@@ -1,0 +1,8 @@
+# TODO Anton add tests
+src/test
+*.class
+build
+.gradle
+.idea
+.DS_Store
+*.iml

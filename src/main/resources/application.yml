@@ -1,0 +1,76 @@
+micronaut:
+  io:
+    watch:
+      paths: src/main # https://github.com/micronaut-projects/micronaut-core/blob/master/src/main/docs/guide/cli/reloading/automaticRestart.adoc
+      restart: true
+  application:
+      name: cobalt-webauth
+  session:
+    http:
+      cookie: false
+      header: true
+
+jackson:
+  serialization:
+    indentOutput: true
+    writeDatesAsTimestamps: false
+  modules:
+    - jackson-module-kotlin
+    - jackson-module-parameter-names
+    - jackson-modules-java8
+#tag::security[]
+micronaut:
+  security:
+    enabled: false # <1>
+    # TODO Anton cleanUp
+    intercept-url-map:
+#      - pattern: /signup*
+#        http-method: POST
+#        access:
+#          - isAnonymous()
+#          - isAuthenticated()
+#      - pattern: /cert*
+#        http-method: GET
+#        access:
+#          - isAnonymous()
+      - pattern: /home
+        access:
+          - isAuthenticated()
+    session:
+      enabled: true
+    endpoints:
+      login:
+        enabled: true # <2>
+      oauth:
+        enabled: true # <3>
+    token:
+      jwt:
+        enabled: true # <4>
+        signatures:
+          secret:
+            generator: # <5>
+              secret: eFBrRZ6etZezqmUpDmfYjoDcRpK4e5OC # <6>
+#end::security[]
+
+datasources:
+  webauth_service:
+    url: jdbc:postgresql://localhost:5555/webauth_service
+    username: webauth
+    password: a385d1ce-c945-11e9-9b59-b3d30f6caedf
+    driverClassName: org.postgresql.Driver
+
+flyway:
+  datasources:
+    webauth_service:
+      locations: classpath:db
+
+webauth: # Must be accessible for external users to complete registration
+  host: http://localhost:8080
+
+mail:
+  smtp:
+    host: localhost
+    port: 1025
+  api:
+    host: localhost
+    port: 2580

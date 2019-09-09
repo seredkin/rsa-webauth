@@ -1,0 +1,116 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.4"
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.5.RELEASE"
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.15"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+    }
+}
+
+ext {
+    springSecurityCryptoVersion='4.2.5.RELEASE'
+    jacksonVersion='2.9.9'
+}
+
+version "0.1"
+group "io.cobalt.webauth"
+
+apply plugin:"io.spring.dependency-management"
+apply plugin:"com.github.johnrengelman.shadow"
+apply plugin:"application"
+apply plugin:"java"
+apply plugin:"net.ltgt.apt-eclipse"
+apply plugin:"net.ltgt.apt-idea"
+apply plugin:"kotlin"
+apply plugin:"kotlin-kapt"
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "https://jcenter.bintray.com" }
+    //tag::spekrepository[]
+    maven { url "https://dl.bintray.com/spekframework/spek-dev" }
+    //end::spekrepository[]
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "io.micronaut:micronaut-bom:$micronautVersion"
+    }
+}
+
+dependencies {
+    compile "io.micronaut:micronaut-http-client"
+    compile "io.micronaut:micronaut-http-server-netty"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+    compile "io.micronaut:micronaut-runtime"
+    compile "io.micronaut:micronaut-session"
+    compile "io.micronaut.configuration:micronaut-redis-lettuce"
+    kapt "io.micronaut:micronaut-inject-java"
+    kaptTest "io.micronaut:micronaut-inject-java"
+
+    compile group: 'io.arrow-kt', name: 'arrow-core', version: '0.8.2'
+    compile group: 'com.google.guava', name: 'guava', version: '28.1-jre'
+    compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: jacksonVersion
+    runtime group: 'com.fasterxml.jackson.module', name: 'jackson-module-parameter-names', version: jacksonVersion
+    runtime group: 'com.fasterxml.jackson.module', name: 'jackson-modules-java8', version: jacksonVersion, ext: 'pom'
+
+    compile group: 'org.simplejavamail', name: 'simple-java-mail', version: '4.1.2'
+    compile "org.springframework.security:spring-security-crypto:${springSecurityCryptoVersion}"
+    compile 'org.jetbrains.exposed:exposed:0.16.1'
+
+    runtime "ch.qos.logback:logback-classic:1.2.3"
+    runtime 'io.micronaut.configuration:micronaut-jdbc-hikari'
+    runtime group: 'org.postgresql', name: 'postgresql', version: '42.2.6'
+    runtime 'io.micronaut.configuration:micronaut-flyway'
+
+    //tag::spek[]
+    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
+    testImplementation "org.spekframework.spek2:spek-dsl-jvm:$spekVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testRuntimeOnly "org.spekframework.spek2:spek-runner-junit5:$spekVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+    //end::spek[]
+
+    //tag::securitydependency[]
+    compile "io.micronaut:micronaut-security-jwt"
+    //end::securitydependency[]
+}
+
+shadowJar {
+    mergeServiceFiles()
+}
+
+run.jvmArgs('-noverify', '-XX:TieredStopAtLevel=1')
+
+mainClassName = "io.cobalt.WebAuthService"
+
+//tag::junitplatform[]
+test {
+    useJUnitPlatform {
+        includeEngines 'spek2'
+        includeEngines 'junit5'
+    }
+}
+//end::junitplatform[]
+
+compileKotlin {
+	kotlinOptions {
+	    jvmTarget = '1.8' 
+	    //Will retain parameter names for Java reflection
+	    javaParameters = true 
+	}
+}
+
+compileTestKotlin {
+	kotlinOptions {
+	    jvmTarget = '1.8' 
+	    javaParameters = true 
+	}
+}

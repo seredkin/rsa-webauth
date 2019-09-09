@@ -1,0 +1,19 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: postgres:9.6-alpine
+    restart: always
+    ports:
+      - 5555:5432
+    environment:
+      POSTGRES_DB: webauth_service
+      POSTGRES_USER: webauth
+      POSTGRES_PASSWORD: a385d1ce-c945-11e9-9b59-b3d30f6caedf
+
+  mail:
+    image: reachfive/fake-smtp-server
+    ports:
+      - 2580:1080
+      - 1025:1025

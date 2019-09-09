@@ -1,0 +1,44 @@
+micronaut:
+  application:
+      name: cobalt-webauth
+  session:
+    http:
+      cookie: false
+      header: true
+      redis:
+        enabled: true
+redis:
+  uri: redis://localhost:6379
+  password: 2461895e-cc30-11e9-b333-db6a2e0ffb31
+
+#tag::security[]
+micronaut:
+  security:
+    enabled: true # <1>
+    session:
+      enabled: true
+    endpoints:
+      login:
+        enabled: true # <2>
+      oauth:
+        enabled: true # <3>
+    token:
+      jwt:
+        enabled: true # <4>
+        signatures:
+          secret:
+            generator: # <5>
+              secret: eFBrRZ6etZezqmUpDmfYjoDcRpK4e5OC # <6>
+#end::security[]
+
+datasources:
+  webauth_service:
+    url: jdbc:postgresql://localhost:5555/webauth_service
+    username: webauth
+    password: a385d1ce-c945-11e9-9b59-b3d30f6caedf
+    driverClassName: org.postgresql.Driver
+
+flyway:
+  datasources:
+    webauth_service:
+      locations: classpath:db
